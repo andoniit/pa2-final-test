@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 
@@ -27,7 +26,7 @@ public class pc extends Thread {
         replicationNodes=FileTS.getRNodes();
         portAddress=FileTS.getpSPort();
         localAddress=FileTS.getLocAddr();
-        filesLocation=FileTS.getLocAddr();
+        filesLocation=FileTS.getFileloc();
     }
 
     //thread implementation for peer to serve as client
