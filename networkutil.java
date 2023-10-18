@@ -4,10 +4,10 @@ public class networkutil{
 
     public static void main(String args[]) throws SocketException{
 
-        System.out.println(getLocalAddress());
+        System.out.println(getLocAddr());
     }
 
-    public static String getLocalAddress(){
+    public static String getLocAddr(){
 
         String localAddress=null;
 

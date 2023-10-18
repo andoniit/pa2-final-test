@@ -5,19 +5,19 @@ public class RES implements Serializable {
 	private int responseCode;
 	private Object responseData;
 	
-	public int getResponseCode() {
+	public int getRespCd() {
 		return responseCode;
 	}
 
-	public void setResponseCode(int responseCode) {
+	public void setRespCd(int responseCode) {
 		this.responseCode = responseCode;
 	}
 
-	public Object getResponseData() {
+	public Object getRespData() {
 		return responseData;
 	}
 
-	public void setResponseData(Object responseData) {
+	public void setRespData(Object responseData) {
 		this.responseData = responseData;
 	}
 }

@@ -1,8 +1,11 @@
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.Calendar;
 import java.io.FileWriter;
 
@@ -13,10 +16,10 @@ import java.io.FileWriter;
 
 public class LogUT {
 
-	private String logF = "";
+	
 	private final String logloc = "logs/";
 	private BufferedWriter writer = null;
-	
+	private String logF = "";
 
 	
 
@@ -34,10 +37,13 @@ public class LogUT {
 	private String getLogFileName(String logType) {
 		switch (logType.toLowerCase()) {
 			case "peer":
+				logF = "peer.server.log";
 				return "peer.server.log";
 			case "server":
+				logF = "server.log";
 				return "server.log";
 			case "replication":
+				logF = "replication.log";
 				return "replication.log";
 			default:
 				throw new IllegalArgumentException("Invalid logType: " + logType);
@@ -59,10 +65,10 @@ public class LogUT {
 	
 
 
-	public boolean write(String logText) {
+	public boolean writeMethod(String logText) {
 		try {
 			if (writer != null) {
-				String timestamp = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
+				String timestamp = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
 				String formattedLog = String.format("%s => %s%n", timestamp, logText);
 				writer.write(formattedLog);
 				return true;
@@ -75,41 +81,58 @@ public class LogUT {
 	
 	
 	// Print method
-	public void print() {
+	public void Logprint() {
 		
 		
-		int charCount = 0;
+		
+		BufferedReader buffer = null;
+		
+
 		
 		System.out.println("\nLOG");
-		System.out.println("=========================================================================");
+		System.out.println("-----------------------------------------------");
+		try {
+			buffer = new BufferedReader(new FileReader(logloc + logF));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		int Count = 0;
+			String lineoflog = null;
+			try {
+				
+				while ((lineoflog = buffer.readLine()) != null) {
+					System.out.println(lineoflog);
+					
+					Count = Count + lineoflog.length();
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		
-		
-		if (charCount == 0) {
+		if (Count == 0) {
 			System.out.println("NO LOGS TO PRINT");
 		}
 
-		System.out.println("=========================================================================");
+		System.out.println("------------------------------------------------");
 	}
 	
 	// close the log
-	public void closelog() {
-		try {
+	public void closelog() throws IOException {
 			if (writer != null) {
 				String newline = System.getProperty("line.separator");
 				writer.write(newline);
 				writer.close();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
 	}
 
 	//destroy
 	@Override
 	protected void finalize() throws Throwable {
-		if (writer != null) {
-			writer.close();
-		}
+		if (writer != null) writer.close();
 		
 	}
 	

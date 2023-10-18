@@ -5,16 +5,16 @@ public class REQ implements Serializable {
 	private String requestType;
 	private Object requestData;
 	
-	public String getRequestType() {
+	public String getReqT() {
 		return requestType;
 	}
-	public void setRequestType(String requestType) {
+	public void setReqType(String requestType) {
 		this.requestType = requestType;
 	}
-	public Object getRequestData() {
+	public Object getReqData() {
 		return requestData;
 	}
-	public void setRequestData(Object requestData) {
+	public void setReqData(Object requestData) {
 		this.requestData = requestData;
 	}
 	

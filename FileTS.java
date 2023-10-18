@@ -9,6 +9,14 @@ import java.net.ServerSocket;
 import java.util.concurrent.ConcurrentHashMap;
 
 
+/*CS550 Advanced Operating Systems Programming Assignment 1 Repo
+Illinois Institute of Technology
+
+Team Name: KK Students:
+
+Anirudha Kapileshwari (akapileshwari@hawk.iit.edu)
+Mugdha Atul Kulkarni (mkulkarni2@hawk.iit.edu) 
+*/
 
 
 // File sharing system
@@ -30,10 +38,17 @@ public class FileTS {
 	
 	private static String fileloc = null;
 	private static String replicaloc = null;
-	
+
+
+	// All connections runes on port 3500
 	private static final int P_S_PORT = 35000;
-	private static final String LOC_ADDR = networkutil.getLocalAddress();
+
+	// To get local IP adddress of the System
+	private static final String LOC_ADDR = networkutil.getLocAddr();
 	
+
+
+
 	
 	public static boolean putinHT(String key, String value, boolean confirm) {
 		if (confirm || !HT.containsKey(key)) {
@@ -66,6 +81,9 @@ public class FileTS {
 			replicatedHT.put(nodeAddress, innerMap);
 		}
 	}
+
+
+
 	
 	public static void removefromREP_HT(String nodeAddress, String key) {
 		HashMap<String, String> innerMap = replicatedHT.get(nodeAddress);
@@ -73,6 +91,9 @@ public class FileTS {
 			innerMap.remove(key);
 		}
 	}
+
+
+
 
 
 	public static String getfromREP_HT(String key) {
@@ -89,28 +110,38 @@ public class FileTS {
 	}
 	
 	
+
+
+
 	public static void setReplicatedHT(ConcurrentHashMap<String, HashMap<String, String>> replicatedHT) {
 		FileTS.replicatedHT = replicatedHT;
 	}
 
 	
+
+
 	// gets replicated hash table
 
 	public static ConcurrentHashMap<String, HashMap<String, String>> getReplicatedHT() {
 		return replicatedHT;
 	}
 
-	
 
-	public static ConcurrentHashMap<String, String> getHT() {
-		return HT;
-	}
 
 
 	public static ArrayList<String> getRNodes() {
 		return RNodes;
 	}
 
+
+
+
+	public static ConcurrentHashMap<String, String> getHT() {
+		return HT;
+	}
+
+
+	
 	
 	
 
@@ -120,9 +151,13 @@ public class FileTS {
 	}
 	
 
+
+
 	public static HashMap<Integer, String> getNetWM() {
 		return netWM;
 	}
+
+
 
 	
 	public static int getpSPort() {
@@ -130,10 +165,14 @@ public class FileTS {
 	}
 	
 	
+
+
 	public static String getLocAddr() {
 		return LOC_ADDR;
 	}
 	
+
+
 	public static void main(String[] args) throws IOException {
 		FileInputStream fileStream = null;
 		
@@ -154,7 +193,7 @@ public class FileTS {
 				String[] peers = peerList.split(",");
 				
 				for (int i = 0; i < peers.length; i++) {
-					if (IPAV.validate(peers[i].trim())) {
+					if (IPAV.checkIP(peers[i].trim())) {
 						netWM.put(i + 1, peers[i].trim());
 					} else {
 						System.out.println("error due to peer IP Invalid....");
@@ -180,7 +219,7 @@ public class FileTS {
 				
 				for (int i = 0; i < peers.length; i++) 
 				{
-					if (IPAV.validate(peers[i].trim())) 
+					if (IPAV.checkIP(peers[i].trim())) 
 					{
 					
 						RNodes.add(peers[i].trim());
@@ -225,12 +264,12 @@ public class FileTS {
 		}
 		
 		// peer and server started 
-		System.out.println("Peer Client Started........");
+		System.out.println("Peer Client Started(PC)........");
 		pc peerClient = new pc();
 		peerClient.start();
 		
 		
-		System.out.println("Peer Server Started........");
+		System.out.println("Peer Server Started(PS)........");
 
 
 
@@ -245,9 +284,15 @@ public class FileTS {
         }
 	}
 	
+
+
+
 	public static String getReplicaloc() {
 		return replicaloc;
 	}
+
+
+
 
 	public static String getFileloc() {
 		return fileloc;

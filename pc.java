@@ -14,52 +14,54 @@ import java.util.Map;
 
 public class pc extends Thread {
 
-    private HashMap<Integer, String> networkMap=null;
-    private ArrayList<String> replicationNodes= null;
+    private HashMap<Integer, String> netMap=null;
+    private ArrayList<String> repliNodes= null;
 
-    private int portAddress=0;
-    private String localAddress=null;
-    private String filesLocation=null;
+    private int portAddr=0;
+    private String filesLoc=null;
+    private String localAddr=null;
+    
 
     public pc(){
-        networkMap=FileTS.getNetWM();
-        replicationNodes=FileTS.getRNodes();
-        portAddress=FileTS.getpSPort();
-        localAddress=FileTS.getLocAddr();
-        filesLocation=FileTS.getFileloc();
+        netMap=FileTS.getNetWM();
+        localAddr=FileTS.getLocAddr();
+        filesLoc=FileTS.getFileloc();
+        repliNodes=FileTS.getRNodes();
+        portAddr=FileTS.getpSPort();
+        
     }
 
     //thread implementation for peer to serve as client
 
     public void run() {
         try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in))) {
-            HashMap<String, String> hm = retrieveHashTable();
+            HashMap<String, String> hm = retrieveHT();
             if (hm != null) {
-                for (Map.Entry e : hm.entrySet()) {
+                for (final Map.Entry e : hm.entrySet()) {
                     FileTS.putinHT(e.getKey().toString(), e.getValue().toString(), true);
                 }
             }
             
-            if (replicationNodes.contains(localAddress)) {
-                System.out.println("****** REPLICATION SERVICE STARTED ******");
+            if (repliNodes.contains(localAddr)) {
+                System.out.println("Replication server Started......");
                 replication service = new replication(null, null, "REPLICATE");
                 service.start();
             }
             
             while (true) {
-                System.out.println("\nWhat do you want to do?");
-                System.out.println("1.Register a file with the peers.");
-                System.out.println("2.Search for a file.");
-                System.out.println("3.Un-register a file with the peers.");
-                System.out.println("4.Print log of this peer.");
+                System.out.println("\nWelocme to File Sharing System!!!!\n Select a Operation to perfrom");
+                System.out.println("1.Upload A file to File Sharing System");
+                System.out.println("2.Browose for a file in File Sharing System");
+                System.out.println("3.Remove a File from File Sharing System");
+                System.out.println("4.Display Log-File of this Peer");
                 System.out.println("5.Exit.");
-                System.out.print("Enter choice and press ENTER:");
+                System.out.print("Enter Number of operation and press ENTER:");
                 
                 int option;
                 try {
                     option = Integer.parseInt(input.readLine());
                 } catch (NumberFormatException e) {
-                    System.out.println("Wrong choice. Try again!!!");
+                    System.out.println("Please choose correct Operation ");
                     continue;
                 }
                 
@@ -80,7 +82,7 @@ public class pc extends Thread {
                         exitPeer(input);
                         break;
                     default:
-                        System.out.println("Wrong choice. Try again!!!");
+                        System.out.println("Please choose correct Operation ");
                         break;
                 }
             }
@@ -92,64 +94,55 @@ public class pc extends Thread {
     //5 different functions for all the above cases
     //register file
     private void registerFile(BufferedReader input) throws IOException {
-        System.out.println("\nEnter name of the file with extension (Example: data.txt) you want to put in the file sharing system:");
-        String fileName = input.readLine();
+        System.out.println("\nEnter The full name of the file with file type(eg-andon.pdf)");
+        String inputfileName = input.readLine();
         
-        if (fileName.trim().length() == 0) {
-            System.out.println("Invalid Filename.");
+        if (inputfileName.trim().length() == 0) {
+            System.out.println("Error in file Name........");
             return;
         }
-        
-        File file = new File(filesLocation + fileName);
+        //////////
+        File file = new File(filesLoc + inputfileName);
         
         if (file.exists()) {
             long startTime = System.currentTimeMillis();
-            if (put(fileName, localAddress)) {
-                System.out.println(fileName + " added to the file sharing system and is available to download for other peers.");
+            if (uploadF(inputfileName, localAddr)) {
+                System.out.println(inputfileName + " Upload is complated............");
             } else {
-                System.out.println("Unable to add " + fileName + " to the file sharing system. Please try again later.");
+                System.out.println("error in adding " + inputfileName + " to the file sharing system.");
             }
-            double time = (double) Math.round(System.currentTimeMillis() - startTime) / 1000;
-            System.out.println("Time Taken: " + time + " seconds.");
+            double timetakentoupload = (double) Math.round(System.currentTimeMillis() - startTime) / 1000;
+            System.out.println("Time Taken: " + timetakentoupload + " seconds.");
         } else {
-            System.out.println("File with the given filename does not exist in [" + filesLocation + "] path.");
+            System.out.println("Location error [" + filesLoc + "] path.");
         }
     }
     
     
     //search for a file
     private void searchForFile(BufferedReader input) throws IOException {
-        System.out.println("\nEnter name of the file you want to look for:");
+        System.out.println("\nEnter name of FILE to Brows in the SYSTEM");
         String fileName = input.readLine();
         String hostAddress;
         
         long startTime = System.currentTimeMillis();
-        String value = get(fileName);
+        String value = Brows(fileName);
         double time = (double) Math.round(System.currentTimeMillis() - startTime) / 1000;
         
         if (value != null) {
-            System.out.println("File Found. Lookup time: " + time + " seconds.");
+            System.out.println("File Available to downlaod. search time: " + time + " seconds.");
             hostAddress = value;
-            System.out.println("The file will be downloaded in the 'downloads' folder in the current location.");
-            //obtain(hostAddress, portAddress, fileName);
-    
-            if (fileName.trim().endsWith(".txt")) {
-                System.out.print("\nDo you want to download (D) or print this file (P)? Enter (D/P):");
-                String download = input.readLine();
-                if (download.equalsIgnoreCase("D")) {
-                    System.out.println("The file will be downloaded in the 'downloads' folder in the current location.");
-                    obtain(hostAddress, portAddress, fileName);
-                } else if (download.equalsIgnoreCase("P")) {
-                    obtain(hostAddress, portAddress, fileName);
-                    //FileUT.printFile(fileName);
+            
+            System.out.print("\nDo you want to download this file? (Y/N):");
+            String download = input.readLine();
+
+            if (download.equalsIgnoreCase("Y")) {
+                    downlaodfile(hostAddress, portAddr, fileName);
+                    System.out.print("\nFile DOWNLOAD Successful");
+                }else{
+                    System.out.print("\nSearch File complated");
                 }
-            } else {
-                System.out.print("\nDo you want to download this file? (Y/N):");
-                String download = input.readLine();
-                if (download.equalsIgnoreCase("Y")) {
-                    obtain(hostAddress, portAddress, fileName);
-                }
-            }
+            
         } else {
             System.out.println("File not found. Lookup time: " + time + " seconds.");
         }
@@ -158,7 +151,7 @@ public class pc extends Thread {
     
     //unregister a file
     private void unregisterFile(BufferedReader input) throws IOException {
-        System.out.println("\nEnter the name of the file you want to remove from the file sharing system:");
+        System.out.println("\n File name to D-Register from SYSTEM");
         String key = input.readLine();
         
         if (!validateKey(key)) {
@@ -170,10 +163,10 @@ public class pc extends Thread {
         
         if (confirm.equalsIgnoreCase("Y")) {
             long startTime = System.currentTimeMillis();
-            if (delete(key)) {
-                System.out.println("The file was successfully removed from the file sharing system.");
+            if (deletefromsystem(key)) {
+                System.out.println("File Removed from SYSTEM......");
             } else {
-                System.out.println("There was an error in removing the file. Please try again later.");
+                System.out.println("Error while Removing File from System");
             }
             double time = (double) Math.round(System.currentTimeMillis() - startTime) / 1000;
             System.out.println("Time taken: " + time + " seconds");
@@ -183,17 +176,17 @@ public class pc extends Thread {
     
     //print log
     private void printLog() {
-        (new LogUT("peer")).print();
+        (new LogUT("peer")).Logprint();
     }
     
     
     //exit peer
     private void exitPeer(BufferedReader input) throws IOException {
-        System.out.print("\nThe files shared by this peer will no longer be accessible by other peers in this network. Are you sure you want to exit? (Y/N)?:");
+        System.out.print("\n Selecting 'Y' will remove this IP from SYSTEM (Y/N)?:");
         String confirm = input.readLine();
         
         if (confirm.equalsIgnoreCase("Y")) {
-            System.out.println("Thanks for using this system.");
+            System.out.println("File Sharing System Turned OFF........");
             System.exit(0);
         }
 
@@ -202,17 +195,17 @@ public class pc extends Thread {
 
 
     //download file
-    private void obtain(String hostAddress, int port, String fileName) {
+    private void downlaodfile(String hostAddress, int port, String fileName) {
         long startTime = System.currentTimeMillis();
         boolean isDownloaded = false;
     
-        if (FileUT.downloadFile(hostAddress, port, fileName, false)) {
+        if (FileUT.downloadF(hostAddress, port, fileName, false)) {
             isDownloaded = true;
         } else {
             List<String> backupNodes = FileTS.getRNodes();
     
             for (String node : backupNodes) {
-                if (FileUT.downloadFile(node, port, fileName, true)) {
+                if (FileUT.downloadF(node, port, fileName, true)) {
                     isDownloaded = true;
                     break;
                 }
@@ -225,32 +218,32 @@ public class pc extends Thread {
         if (isDownloaded) {
             System.out.println("File downloaded successfully in " + time + " seconds.");
         } else {
-            System.out.println("Unable to connect to the host. Unable to download the file. Try using a different peer if available.");
+            System.out.println("Undfeined Error");
         }
     }
 
 
 
 //retrives hashtable from one of the replication nodes
-    private HashMap<String, String> retrieveHashTable() {
+    private HashMap<String, String> retrieveHT() {
     HashMap<String, String> hm = null;
 
-    for (String nodeAddress : replicationNodes) {
-        if (nodeAddress.equalsIgnoreCase(localAddress)) {
+    for (String nodeAddress : repliNodes) {
+        if (nodeAddress.equalsIgnoreCase(localAddr)) {
             continue;
         }
 
-        try (Socket socket = new Socket(nodeAddress, portAddress);
+        try (Socket socket = new Socket(nodeAddress, portAddr);
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
             REQ peerRequest = new REQ();
-            peerRequest.setRequestType("GET_R_HASHTABLE");
+            peerRequest.setReqType("GET_R_HASHTABLE");
             out.writeObject(peerRequest);
 
             RES serverResponse = (RES) in.readObject();
-            if (serverResponse != null && serverResponse.getResponseCode() == 200) {
-                hm = (HashMap<String, String>) serverResponse.getResponseData();
+            if (serverResponse != null && serverResponse.getRespCd() == 200) {
+                hm = (HashMap<String, String>) serverResponse.getRespData();
                 break;
             }
         } catch (Exception ex) {
@@ -258,20 +251,20 @@ public class pc extends Thread {
         }
     }
 
-    // System.out.println("hm = " + hm);
+    
     return hm;
 }
 
 
     //this method is used to register a file on a network
-    private boolean put(String key, String value) {
+    private boolean uploadF(String key, String value) {
         try {
-            int node = hash(key);
-            String nodeAddress = networkMap.get(node);
+            int node = hashID(key);
+            String nodeAddress = netMap.get(node);
     
-            if (nodeAddress.equals(localAddress)) {
+            if (nodeAddress.equals(localAddr)) {
                 if (FileTS.getHT().containsKey(key)) {
-                    System.out.print("\nA file with the same name is already registered by this peer. Would you like to overwrite it? (Y/N): ");
+                    System.out.print("\nAlready available,Overight? (Y/N):  ");
                     String confirm = (new BufferedReader(new InputStreamReader(System.in))).readLine();
     
                     if (confirm.equalsIgnoreCase("Y")) {
@@ -285,26 +278,26 @@ public class pc extends Thread {
                     return true;
                 }
             } else {
-                try (Socket socket = new Socket(nodeAddress, portAddress);
+                try (Socket socket = new Socket(nodeAddress, portAddr);
                      ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                      ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
     
                     String data = key + "," + value;
                     REQ peerRequest = new REQ();
-                    peerRequest.setRequestType("REGISTER");
-                    peerRequest.setRequestData(data);
+                    peerRequest.setReqType("REGISTER");
+                    peerRequest.setReqData(data);
                     out.writeObject(peerRequest);
     
                     RES serverResponse = (RES) in.readObject();
     
-                    if (serverResponse.getResponseCode() == 200) {
+                    if (serverResponse.getRespCd() == 200) {
                         return true;
-                    } else if (serverResponse.getResponseCode() == 300) {
-                        System.out.print("\nA VALUE with the specified KEY already exists in the Distributed Hash Table. Would you like to overwrite it? (Y/N): ");
+                    } else if (serverResponse.getRespCd() == 300) {
+                        System.out.print("\n Already available,Overight? (Y/N): ");
                         String confirm = (new BufferedReader(new InputStreamReader(System.in))).readLine();
     
                         if (confirm.equalsIgnoreCase("Y")) {
-                            return forcePut(key, value);
+                            return forceupload(key, value);
                         }
                     } else {
                         // Handle the response appropriately.
@@ -322,7 +315,7 @@ public class pc extends Thread {
 
 
     //this method forces a file to register on a network
-    private boolean forcePut(String key, String value) {
+    private boolean forceupload(String key, String value) {
         Socket socket = null;
         ObjectInputStream in = null;
         ObjectOutputStream out = null;
@@ -336,14 +329,14 @@ public class pc extends Thread {
         try {
             startTime = System.currentTimeMillis();
     
-            int node = hash(key);
-            String nodeAddress = networkMap.get(node);
+            int node = hashID(key);
+            String nodeAddress = netMap.get(node);
     
-            if (nodeAddress.equals(localAddress)) {
+            if (nodeAddress.equals(localAddr)) {
                 boolean result = FileTS.getHT().containsKey(key);
     
                 if (result) {
-                    System.out.print("\nA file with the same name is already registered by this peer. Would you like to overwrite it? (Y/N): ");
+                    System.out.print("\nAlready available,Overight? (Y/N):  ");
                     String confirm = (new BufferedReader(new InputStreamReader(System.in))).readLine();
     
                     if (confirm.equalsIgnoreCase("Y")) {
@@ -371,25 +364,25 @@ public class pc extends Thread {
                     return true;
                 }
             } else {
-                socket = new Socket(nodeAddress, portAddress);
+                socket = new Socket(nodeAddress, portAddr);
                 out = new ObjectOutputStream(socket.getOutputStream());
                 out.flush();
                 in = new ObjectInputStream(socket.getInputStream());
     
                 peerRequest = new REQ();
-                peerRequest.setRequestType("REGISTER_FORCE");
-                peerRequest.setRequestData(data);
+                peerRequest.setReqType("REGISTER_FORCE");
+                peerRequest.setReqData(data);
                 out.writeObject(peerRequest);
     
                 serverResponse = (RES) in.readObject();
     
-                if (serverResponse.getResponseCode() == 200) {
+                if (serverResponse.getRespCd() == 200) {
                     endTime = System.currentTimeMillis();
                     time = (double) Math.round(endTime - startTime) / 1000;
                     System.out.println("Time taken: " + time + " seconds");
                     return true;
                 } else {
-                    System.out.print(serverResponse.getResponseData());
+                    System.out.print(serverResponse.getRespData());
                     return false;
                 }
             }
@@ -415,36 +408,38 @@ public class pc extends Thread {
 
 
     //searches for a file on a network
-    private String get(String key) {
+    private String Brows(String key) {
         String value = null;
-        Socket socket = null;
-        ObjectInputStream in = null;
-        ObjectOutputStream out = null;
-        REQ peerRequest = null;
         RES serverResponse = null;
+        Socket socket = null;
+         ObjectOutputStream out = null;
+        REQ peerRequest = null;
+
         String nodeAddress=null;
+        ObjectInputStream in = null;
+       
         
         try {
-            int node = hash(key);
-            nodeAddress = networkMap.get(node);
+            int node = hashID(key);
+            nodeAddress = netMap.get(node);
     
-            if (nodeAddress.equals(localAddress)) {
+            if (nodeAddress.equals(localAddr)) {
                 value = FileTS.getfromHT(key);
             } else {
-                socket = new Socket(nodeAddress, portAddress);
+                socket = new Socket(nodeAddress, portAddr);
                 out = new ObjectOutputStream(socket.getOutputStream());
                 out.flush();
                 in = new ObjectInputStream(socket.getInputStream());
     
                 peerRequest = new REQ();
-                peerRequest.setRequestType("LOOKUP");
-                peerRequest.setRequestData(key);
+                peerRequest.setReqType("LOOKUP");
+                peerRequest.setReqData(key);
                 out.writeObject(peerRequest);
     
                 serverResponse = (RES) in.readObject();
     
-                if (serverResponse.getResponseCode() == 200) {
-                    String[] responseData = serverResponse.getResponseData().toString().split(",");
+                if (serverResponse.getRespCd() == 200) {
+                    String[] responseData = serverResponse.getRespData().toString().split(",");
                     if (responseData.length >= 2) {
                         value = responseData[1].trim();
                     }
@@ -469,7 +464,7 @@ public class pc extends Thread {
     
         if (value == null) {
             // Handle replication search if the primary node didn't return a result
-            value = searchReplica(key, nodeAddress);
+            value = RepiSearch(key, nodeAddress);
         }
     
         return value;
@@ -477,33 +472,36 @@ public class pc extends Thread {
 
 
     //this function searches for a file on a replica
-    private String searchReplica(String key, String peerAddress) {
+    private String RepiSearch(String key, String peerAddress) {
         String value = null;
-        Socket socket = null;
         ObjectInputStream in = null;
         ObjectOutputStream out = null;
+
+
         REQ peerRequest = null;
         RES serverResponse = null;
+        Socket socket = null;
+        
     
-        for (String nodeAddress : replicationNodes) {
+        for (String nodeAddress : repliNodes) {
             try {
-                if (nodeAddress.equals(localAddress)) {
+                if (nodeAddress.equals(localAddr)) {
                     value = FileTS.getfromREP_HT(key);
                 } else {
-                    socket = new Socket(nodeAddress, portAddress);
+                    socket = new Socket(nodeAddress, portAddr);
                     out = new ObjectOutputStream(socket.getOutputStream());
                     out.flush();
                     in = new ObjectInputStream(socket.getInputStream());
     
                     peerRequest = new REQ();
-                    peerRequest.setRequestType("R_LOOKUP");
-                    peerRequest.setRequestData(key);
+                    peerRequest.setReqType("R_LOOKUP");
+                    peerRequest.setReqData(key);
                     out.writeObject(peerRequest);
     
                     serverResponse = (RES) in.readObject();
     
-                    if (serverResponse.getResponseCode() == 200) {
-                        value = serverResponse.getResponseData().toString().split(",")[1].trim();
+                    if (serverResponse.getRespCd() == 200) {
+                        value = serverResponse.getRespData().toString().split(",")[1].trim();
                     }
                 }
             } catch (Exception ex) {
@@ -532,7 +530,7 @@ public class pc extends Thread {
 
 
     //unregistrs file from a netwrok
-    private boolean delete(String key) {
+    private boolean deletefromsystem(String key) {
         Socket socket = null;
         ObjectInputStream in = null;
         ObjectOutputStream out = null;
@@ -540,49 +538,49 @@ public class pc extends Thread {
         RES serverResponse = null;
         String nodeAddress=null;
         
-        int node = hash(key);
-        nodeAddress = networkMap.get(node);
+        int node = hashID(key);
+        nodeAddress = netMap.get(node);
     
         try {
-            // Make a connection with the server using the specified Host Address and Port portAddress
-            socket = new Socket(nodeAddress, portAddress);
             
-            // Initialize the output stream using the socket's output stream
+            socket = new Socket(nodeAddress, portAddr);
+            
+            
             out = new ObjectOutputStream(socket.getOutputStream());
             out.flush();
             
-            // Initialize the input stream using the socket's input stream
+            
             in = new ObjectInputStream(socket.getInputStream());
     
-            // Setup a Request object with Request Type = UNREGISTER and Request Data = KEY
+            
             peerRequest = new REQ();
-            peerRequest.setRequestType("UNREGISTER");
-            peerRequest.setRequestData(key);
+            peerRequest.setReqType("UNREGISTER");
+            peerRequest.setReqData(key);
             out.writeObject(peerRequest);
             
-            // Read the response message from the server
+            
             serverResponse = (RES) in.readObject();
     
-            if (serverResponse.getResponseCode() == 200) {
+            if (serverResponse.getRespCd() == 200) {
                 return true;
             } else {
                 return false;
             }
         } catch (IOException | ClassNotFoundException e) {
-            // Handle exceptions as needed
+            
             e.printStackTrace();
         } finally {
             try {
-                // Close all streams if they are initialized
-                if (out != null)
-                    out.close();
                 
-                if (in != null)
-                    in.close();
+                if (out != null) out.close();
                 
-                if (socket != null)
-                    socket.close();
-            } catch (IOException e) {
+                if (in != null) in.close();
+                
+                if (socket != null) socket.close();
+            } 
+            
+            
+            catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -590,41 +588,36 @@ public class pc extends Thread {
         return false;
     }
 
-    private int hash(String key) {
-        int hash = 5381; // Initial hash value
+    private int hashID(String key) {
+        int hash = 5381; 
     
         for (int i = 0; i < key.length(); i++) {
-            hash = (hash * 33) ^ key.charAt(i); // DJB2 hash function
+            hash = (hash * 33) ^ key.charAt(i); 
         }
     
-        // Make sure the result is non-negative and within the range of total servers
-        int totalServers = networkMap.size();
+        
+
+        int totalServers = netMap.size();
         return (hash & Integer.MAX_VALUE) % totalServers;
     }
 
     
     private boolean validateKey(String key) {
-		// Check if KEY is greater than 0 bytes and not more than 24 bytes i.e. 12 characters in JAVA. We are not using any HEADER
+		
 		if (key.trim().length() == 0) {
 			System.out.println("Invalid KEY.");
 			return false;
-		} else if (key.trim().length() > 10) {
+		}
+        
+        
+        else if (key.trim().length() > 10) {
 			System.out.println("Invalid KEY. KEY should not be more than 24 bytes (12 characters).");
 			return false;
 		}
 		return true;
 	}
 
-    private boolean validateValue(String value) {
-        int minMaxLength = 500;
     
-        if (value.trim().isEmpty() || value.length() > 2 * minMaxLength) {
-            System.out.println("Invalid VALUE. VALUE should be between 1 and 1000 bytes.");
-            return false;
-        }
-    
-        return true;
-    }
    
 }
 

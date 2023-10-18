@@ -20,7 +20,7 @@ public class IPAV {
       + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
 
   
-    public static boolean validate(final String ipAddress) {
+    public static boolean checkIP(final String ipAddress) {
         Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
         Matcher matcher = pattern.matcher(ipAddress);
         return matcher.matches();
@@ -29,7 +29,7 @@ public class IPAV {
     public static void main(String[] args) {
         String ipAddress = "192.168.64.6";
 
-        if (validate(ipAddress)) {
+        if (checkIP(ipAddress)) {
             System.out.println(ipAddress + " is a valid IP address.");
         } else {
             System.out.println(ipAddress + " is not a valid IP address.");
@@ -37,6 +37,6 @@ public class IPAV {
     }
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ IPAV {
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
     
 

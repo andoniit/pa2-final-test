@@ -1,4 +1,4 @@
-import java.io.IOException;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -11,59 +11,59 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class replication extends Thread{
 
-    private ArrayList<String> replicationNodes= null;
+    private ArrayList<String> repliNodes= null;
     private int portNumber;
-    private String localAddress=null;
-    private HashMap<Integer, String> networkMap= null;
+    private String localAddr=null;
+    private HashMap<Integer, String> netMap= null;
 
-    private String dataKey=null;
-    private String dataValue=null;
-    private String requestType=null;
+    private String dKey=null;
+    private String dValue=null;
+    private String reqType=null;
     int portAddress=0;
 
     public replication(String key,String value, String requestType){
 
-        replicationNodes=FileTS.getRNodes();
+        repliNodes=FileTS.getRNodes();
         portNumber=FileTS.getpSPort();
-        localAddress=FileTS.getLocAddr();
-        networkMap=FileTS.getNetWM();
+        localAddr=FileTS.getLocAddr();
+        netMap=FileTS.getNetWM();
 
-        this.dataKey=key;
-        this.dataValue=value;
-        this.requestType=requestType;
+        this.dKey=key;
+        this.dValue=value;
+        this.reqType=requestType;
 
     }
 
     public void run() {
        
-        String data = this.dataKey + "," + this.dataValue;
+        String data = this.dKey + "," + this.dValue;
         
     
-        if (requestType.equalsIgnoreCase("REPLICATE")) {
+        if (reqType.equalsIgnoreCase("REPLICATE")) {
             replicateHashTables();
             replicateFiles();
             this.interrupt();
             return;
         }
     
-        for (String nodeAddress : replicationNodes) {
+        for (String nodeAddress : repliNodes) {
             try {
-                if (requestType.equalsIgnoreCase("REGISTER")) {
-                    if (nodeAddress.equalsIgnoreCase(localAddress)) {
+                if (reqType.equalsIgnoreCase("REGISTER")) {
+                    if (nodeAddress.equalsIgnoreCase(localAddr)) {
                         // Handle the local register operation
                         LogUT log = new LogUT("peer");
-                        log.write(String.format("Serving REPLICATE - REGISTER(%s,%s) request of %s.", this.dataKey, this.dataValue, localAddress));
-                        FileTS.putinREP_HT(nodeAddress, this.dataKey, this.dataValue);
-                        replicate(this.dataValue, portAddress, this.dataKey);
-                        log.write(String.format("REPLICATE - REGISTER(%s,%s) for %s completed successfully.", this.dataKey, this.dataValue, localAddress));
+                        log.writeMethod(String.format("Serving REPLICATE - REGISTER(%s,%s) request of %s.", this.dKey, this.dValue, localAddr));
+                        FileTS.putinREP_HT(nodeAddress, this.dKey, this.dValue);
+                        replicate(this.dValue, portAddress, this.dKey);
+                        log.writeMethod(String.format("REPLICATE - REGISTER(%s,%s) for %s completed successfully.", this.dKey, this.dValue, localAddr));
                         log.closelog();
                     } else {
                         // Handle the remote register operation
                         handleRegisterOrUnregister(nodeAddress, "R_REGISTER", data);
                     }
-                } else if (requestType.equalsIgnoreCase("UNREGISTER")) {
+                } else if (reqType.equalsIgnoreCase("UNREGISTER")) {
                     // Handle the unregister operation
-                    handleRegisterOrUnregister(nodeAddress, "R_UNREGISTER", this.dataKey);
+                    handleRegisterOrUnregister(nodeAddress, "R_UNREGISTER", this.dKey);
                 }
             } catch (Exception ex) {
                 // Handle exceptions or log errors.
@@ -79,8 +79,8 @@ public class replication extends Thread{
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
     
             REQ peerRequest = new REQ();
-            peerRequest.setRequestType(requestType);
-            peerRequest.setRequestData(requestData);
+            peerRequest.setReqType(requestType);
+            peerRequest.setReqData(requestData);
             out.writeObject(peerRequest);
     
             // Read the response message from the server
@@ -94,7 +94,7 @@ public class replication extends Thread{
     //retrives data from hash table
     private boolean replicateHashTables() {
 		ConcurrentHashMap<String, HashMap<String, String>> replicatedHashTable = null;		
-		if (replicationNodes.size() > 1) {
+		if (repliNodes.size() > 1) {
 			// If there is another replication node, get replication data from another data
 			replicatedHashTable = getReplicationData();
 		} else {
@@ -122,14 +122,14 @@ public class replication extends Thread{
     
     //download file from requested peer
     private void replicate(String hostAddress, int port, String fileName) {
-        FileUT.replicateFile(hostAddress, port, fileName);
+        FileUT.replicateF(hostAddress, port, fileName);
     }
 
 
     //retrives replication hash tables from replication nodes
     private ConcurrentHashMap<String, HashMap<String, String>> getReplicationData() {
-    for (String nodeAddress : replicationNodes) {
-        if (nodeAddress.equalsIgnoreCase(localAddress)) {
+    for (String nodeAddress : repliNodes) {
+        if (nodeAddress.equalsIgnoreCase(localAddr)) {
             continue;
         }
 
@@ -138,12 +138,12 @@ public class replication extends Thread{
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
             REQ peerRequest = new REQ();
-            peerRequest.setRequestType("GET_REPLICA");
+            peerRequest.setReqType("GET_REPLICA");
             out.writeObject(peerRequest);
 
             RES serverResponse = (RES) in.readObject();
-            if (serverResponse != null && serverResponse.getResponseCode() == 200) {
-                return (ConcurrentHashMap<String, HashMap<String, String>>) serverResponse.getResponseData();
+            if (serverResponse != null && serverResponse.getRespCd() == 200) {
+                return (ConcurrentHashMap<String, HashMap<String, String>>) serverResponse.getRespData();
             }
         } catch (Exception ex) {
             // Handle or log the exception as needed
@@ -158,8 +158,8 @@ public class replication extends Thread{
 private ConcurrentHashMap<String, HashMap<String, String>> getAllHashTables() {
     ConcurrentHashMap<String, HashMap<String, String>> replicatedHashTable = new ConcurrentHashMap<>();
 
-    for (Map.Entry<Integer, String> peer : networkMap.entrySet()) {
-        if (peer.getValue().equalsIgnoreCase(localAddress)) {
+    for (Map.Entry<Integer, String> peer : netMap.entrySet()) {
+        if (peer.getValue().equalsIgnoreCase(localAddr)) {
             if (FileTS.getHT().size() > 0) {
                 replicatedHashTable.put(peer.getValue(), new HashMap<>(FileTS.getHT()));
             }
@@ -171,12 +171,12 @@ private ConcurrentHashMap<String, HashMap<String, String>> getAllHashTables() {
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
             REQ peerRequest = new REQ();
-            peerRequest.setRequestType("GET_HASHTABLE");
+            peerRequest.setReqType("GET_HASHTABLE");
             out.writeObject(peerRequest);
 
             RES serverResponse = (RES) in.readObject();
-            if (serverResponse != null && serverResponse.getResponseCode() == 200) {
-                ConcurrentHashMap<String, String> hm = (ConcurrentHashMap<String, String>) serverResponse.getResponseData();
+            if (serverResponse != null && serverResponse.getRespCd() == 200) {
+                ConcurrentHashMap<String, String> hm = (ConcurrentHashMap<String, String>) serverResponse.getRespData();
                 if (hm.size() > 0) {
                     replicatedHashTable.put(peer.getValue(), new HashMap<>(hm));
                 }

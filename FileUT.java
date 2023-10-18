@@ -10,6 +10,15 @@ import java.util.ArrayList;
 import java.nio.file.Files;
 
 
+/*CS550 Advanced Operating Systems Programming Assignment 1 Repo
+Illinois Institute of Technology
+
+Team Name: KK Students:
+
+Anirudha Kapileshwari (akapileshwari@hawk.iit.edu)
+Mugdha Atul Kulkarni (mkulkarni2@hawk.iit.edu) 
+*/
+
 
 
 
@@ -26,7 +35,7 @@ public class FileUT {
 	
 	// featching file functon
 
-	public static ArrayList<String> getFiles(String path) {
+	public static ArrayList<String> getF(String path) {
 		
 		ArrayList<String> files = new ArrayList<String>();
 		
@@ -51,7 +60,7 @@ public class FileUT {
 	}
 	
 	//fetch file form location
-	public static String getFileLocation(String fileName, List<String> locations) {
+	public static String getFLoc(String fileName, List<String> locations) {
 		for (String path : locations) {
 			
 			File folder = new File(path);
@@ -70,7 +79,7 @@ public class FileUT {
 	
 	// downlaod from peer
 
-	public static boolean downloadFile(String hostAddress, int port, String fileName, boolean fromReplica) {
+	public static boolean downloadF(String hostAddress, int port, String fileName, boolean fromReplica) {
 		ObjectInputStream in = null;
 		ObjectOutputStream out = null;
 		Socket socket = null;
@@ -100,8 +109,8 @@ public class FileUT {
 
 
 			REQ request = new REQ();
-			request.setRequestType(fromReplica ? "R_DOWNLOAD" : "DOWNLOAD");
-			request.setRequestData(fileName);
+			request.setReqType(fromReplica ? "R_DOWNLOAD" : "DOWNLOAD");
+			request.setReqData(fileName);
 			out.writeObject(request);
 
 
@@ -144,9 +153,11 @@ public class FileUT {
 		return isDownloaded;
 	}
 	
+
+
 	//replication of the file
 
-	public static boolean replicateFile(String hostAddress, int port, String fileName) {
+	public static boolean replicateF(String hostAddress, int port, String fileName) {
 		ObjectInputStream in = null;
 		ObjectOutputStream out = null;
 		
@@ -170,16 +181,16 @@ public class FileUT {
 			out = new ObjectOutputStream(socket.getOutputStream());
 			out.flush();
 	
-			log.write("Requesting file ... " + fileName);
+			log.writeMethod("Requesting file ... " + fileName);
 			
 			
 			REQ request = new REQ();
-			request.setRequestType("DOWNLOAD");
-			request.setRequestData(fileName);
+			request.setReqType("DOWNLOAD");
+			request.setReqData(fileName);
 			out.writeObject(request);
 	
 			
-			log.write("Downloading file ... " + fileName);
+			log.writeMethod("Downloading file ... " + fileName);
 			in = new ObjectInputStream(socket.getInputStream());
 	
 			File outputFile = new File(rlocation + fileName);
@@ -189,14 +200,14 @@ public class FileUT {
 	
 			long endTime = System.currentTimeMillis();
 			double time = (double) Math.round(endTime - startTime) / 1000;
-			log.write("File downloaded successfully in " + time + " seconds.");
+			log.writeMethod("File downloaded Complated in " + time + " seconds.");
 			isReplicated = true;
 		} catch (SocketException e) {
-			log.write("Unable to connect to the host. Unable to download file.");
-			log.write("Error: " + e);
+			log.writeMethod("connection Error with host, File not Downloaded");
+			log.writeMethod("Error: " + e);
 		} catch (Exception e) {
-			log.write("Unable to download file. Please check if you have write permission.");
-			log.write("Error: " + e);
+			log.writeMethod("error in downloading file check file properties(write)");
+			log.writeMethod("Error: " + e);
 		}
 		
 		finally {
@@ -216,43 +227,10 @@ public class FileUT {
 		return isReplicated;
 	}
 
-	// print file wanted to delete 
-	// public static void printFile(String fileName) {
-	// 	File file = new File(dlocation + fileName);
-	// 	if (file.exists()) {
-	// 		System.out.println("\nTHE FILE HAS BEEN DOWNLOADED TO THE downloads FOLDER IN THE CURRENT LOCATION");
-	// 		System.out.println("AND THE CONTENTS OF THE FILE ARE BELOW. PRINTING ONLY FIRST 1000 CHARACTERS.");
-	// 		System.out.println("=========================================================================");
-	// 		BufferedReader br = null;
-	// 		int charCount = 0;
-			
-	// 		try {
-	// 			// Printing file using FileReader
-	// 			br = new BufferedReader(new FileReader(dlocation + fileName));
-	// 			String line = null;
-	// 			while ((line = br.readLine()) != null) {
-	// 				System.out.println(line);
-	// 				charCount += line.length();
-	// 				if(charCount > 1000) break;
-	// 			}
-	// 		} catch (Exception e) {
-	// 			System.out.println("Unable to print file.");
-	// 			System.out.println("Error:" + e);
-	// 		} finally {
-	// 			try {
-	// 				if (br != null)
-	// 					br.close();
-	// 			} catch (IOException e) {
-	// 				e.printStackTrace();
-	// 			}
-	// 		}
-	// 		System.out.println("=========================================================================");
-	// 	} else {
-	// 		System.out.println("\nThe file could not be printed because it may not have been downloaded.");
-	// 	}
-	// }
-	
-	public static boolean deleteFile(String fileName) {
+
+
+	//Delete File Fnc
+	public static boolean deleF(String fileName) {
 		File file = new File(rlocation + fileName);
 		if (file.exists()) {
 			return file.delete();
