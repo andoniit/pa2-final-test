@@ -131,25 +131,25 @@ public class pc extends Thread {
             System.out.println("File Found. Lookup time: " + time + " seconds.");
             hostAddress = value;
             System.out.println("The file will be downloaded in the 'downloads' folder in the current location.");
-            obtain(hostAddress, portAddress, fileName);
+            //obtain(hostAddress, portAddress, fileName);
     
-            // if (fileName.trim().endsWith(".txt")) {
-            //     System.out.print("\nDo you want to download (D) or print this file (P)? Enter (D/P):");
-            //     String download = input.readLine();
-            //     if (download.equalsIgnoreCase("D")) {
-            //         System.out.println("The file will be downloaded in the 'downloads' folder in the current location.");
-            //         obtain(hostAddress, portAddress, fileName);
-            //     } else if (download.equalsIgnoreCase("P")) {
-            //         obtain(hostAddress, portAddress, fileName);
-            //         FileUT.printFile(fileName);
-            //     }
-            // } else {
-            //     System.out.print("\nDo you want to download this file? (Y/N):");
-            //     String download = input.readLine();
-            //     if (download.equalsIgnoreCase("Y")) {
-            //         obtain(hostAddress, portAddress, fileName);
-            //     }
-            // }
+            if (fileName.trim().endsWith(".txt")) {
+                System.out.print("\nDo you want to download (D) or print this file (P)? Enter (D/P):");
+                String download = input.readLine();
+                if (download.equalsIgnoreCase("D")) {
+                    System.out.println("The file will be downloaded in the 'downloads' folder in the current location.");
+                    obtain(hostAddress, portAddress, fileName);
+                } else if (download.equalsIgnoreCase("P")) {
+                    obtain(hostAddress, portAddress, fileName);
+                    //FileUT.printFile(fileName);
+                }
+            } else {
+                System.out.print("\nDo you want to download this file? (Y/N):");
+                String download = input.readLine();
+                if (download.equalsIgnoreCase("Y")) {
+                    obtain(hostAddress, portAddress, fileName);
+                }
+            }
         } else {
             System.out.println("File not found. Lookup time: " + time + " seconds.");
         }
@@ -503,10 +503,7 @@ public class pc extends Thread {
                     serverResponse = (RES) in.readObject();
     
                     if (serverResponse.getResponseCode() == 200) {
-                        String[] responseData = serverResponse.getResponseData().toString().split(",");
-                        if (responseData.length >= 2) {
-                            value = responseData[1].trim();
-                        }
+                        value = serverResponse.getResponseData().toString().split(",")[1].trim();
                     }
                 }
             } catch (Exception ex) {

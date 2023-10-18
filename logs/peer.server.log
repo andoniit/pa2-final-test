@@ -1,0 +1,12 @@
+10-17-2023 11:57:49 => Connected with /192.168.64.4.
+10-17-2023 11:57:49 => Serving REGISTER(Check_Samp.txt,null) request of 192.168.64.4.
+10-17-2023 11:57:49 => REGISTER(Check_Samp.txt,null) for 192.168.64.4 completed successfully.
+
+10-17-2023 12:17:48 => Connected with /192.168.64.4.
+10-17-2023 12:17:48 => Serving REGISTER(2.txt,null) request of 192.168.64.4.
+10-17-2023 12:17:48 => REGISTER(2.txt,null) for 192.168.64.4 completed successfully.
+
+10-17-2023 22:51:29 => Connected with /192.168.64.4.
+10-17-2023 22:51:29 => Uploading/Sending file 1.txt
+10-17-2023 22:51:29 => File sent successfully.
+
