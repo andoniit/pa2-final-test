@@ -9,7 +9,7 @@ import java.net.ServerSocket;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-/*CS550 Advanced Operating Systems Programming Assignment 1 Repo
+/*CS550 Advanced Operating Systems Programming Assignment 2 Repo
 Illinois Institute of Technology
 
 Team Name: KK Students:
