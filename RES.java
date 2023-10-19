@@ -5,6 +5,7 @@ public class RES implements Serializable {
 	private int responseCode;
 	private Object responseData;
 	
+	
 	public int getRespCd() {
 		return responseCode;
 	}

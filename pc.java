@@ -43,19 +43,20 @@ public class pc extends Thread {
             }
             
             if (repliNodes.contains(localAddr)) {
-                System.out.println("Replication server Started......");
+                System.out.println("Replication server Started!");
                 replication service = new replication(null, null, "REPLICATE");
                 service.start();
             }
             
             while (true) {
-                System.out.println("\nWelocme to File Sharing System!!!!\n Select a Operation to perfrom");
+                System.out.println("\n **************PA2 TEAM KK***************");
+                System.out.println("\n Welocme to File Sharing System\n Select a Operation to perfrom");
                 System.out.println("1.Upload A file to File Sharing System");
-                System.out.println("2.Browose for a file in File Sharing System");
+                System.out.println("2.Browse for a file in File Sharing System");
                 System.out.println("3.Remove a File from File Sharing System");
                 System.out.println("4.Display Log-File of this Peer");
                 System.out.println("5.Exit.");
-                System.out.print("Enter Number of operation and press ENTER:");
+                System.out.print("Enter the choice of operation and press ENTER:");
                 
                 int option;
                 try {
@@ -98,16 +99,16 @@ public class pc extends Thread {
         String inputfileName = input.readLine();
         
         if (inputfileName.trim().length() == 0) {
-            System.out.println("Error in file Name........");
+            System.out.println("Error in file Name!");
             return;
         }
-        //////////
+        
         File file = new File(filesLoc + inputfileName);
         
         if (file.exists()) {
             long startTime = System.currentTimeMillis();
             if (uploadF(inputfileName, localAddr)) {
-                System.out.println(inputfileName + " Upload is complated............");
+                System.out.println(inputfileName + " Upload is complated!");
             } else {
                 System.out.println("error in adding " + inputfileName + " to the file sharing system.");
             }
@@ -121,7 +122,7 @@ public class pc extends Thread {
     
     //search for a file
     private void searchForFile(BufferedReader input) throws IOException {
-        System.out.println("\nEnter name of FILE to Brows in the SYSTEM");
+        System.out.println("\nEnter name of FILE to Browse in the SYSTEM");
         String fileName = input.readLine();
         String hostAddress;
         
@@ -164,7 +165,7 @@ public class pc extends Thread {
         if (confirm.equalsIgnoreCase("Y")) {
             long startTime = System.currentTimeMillis();
             if (deletefromsystem(key)) {
-                System.out.println("File Removed from SYSTEM......");
+                System.out.println("File Removed from SYSTEM!");
             } else {
                 System.out.println("Error while Removing File from System");
             }
@@ -186,7 +187,7 @@ public class pc extends Thread {
         String confirm = input.readLine();
         
         if (confirm.equalsIgnoreCase("Y")) {
-            System.out.println("File Sharing System Turned OFF........");
+            System.out.println("File Sharing System Turned OFF!");
             System.exit(0);
         }
 
@@ -293,7 +294,7 @@ public class pc extends Thread {
                     if (serverResponse.getRespCd() == 200) {
                         return true;
                     } else if (serverResponse.getRespCd() == 300) {
-                        System.out.print("\n Already available,Overight? (Y/N): ");
+                        System.out.print("\n Already available,Overwrite? (Y/N): ");
                         String confirm = (new BufferedReader(new InputStreamReader(System.in))).readLine();
     
                         if (confirm.equalsIgnoreCase("Y")) {
@@ -336,7 +337,7 @@ public class pc extends Thread {
                 boolean result = FileTS.getHT().containsKey(key);
     
                 if (result) {
-                    System.out.print("\nAlready available,Overight? (Y/N):  ");
+                    System.out.print("\nAlready available,Overwrite? (Y/N):  ");
                     String confirm = (new BufferedReader(new InputStreamReader(System.in))).readLine();
     
                     if (confirm.equalsIgnoreCase("Y")) {

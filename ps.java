@@ -68,33 +68,30 @@ public class ps extends Thread {
         String data = (String) request.getReqData();
         String key = data.split(",")[0];
         String value = data.split(",")[1];
-        boolean result;
-        RES res=null;
-
+    
         log.writeMethod(String.format("Serving REGISTER(%s,%s) request of %s.", key, value, socket.getInetAddress().getHostAddress()));
-
-        if (request.getReqT().endsWith("FORCE")) {
-            result = FileTS.putinHT(key, value, true);
-        } else {
-            result = FileTS.putinHT(key, value, false);
-        }
-
+    
+        boolean forceMode = request.getReqT().endsWith("FORCE");
+        boolean result = FileTS.putinHT(key, value, forceMode);
+    
+        RES res = new RES();
+    
         if (result) {
-            res = new RES();
             res.setRespCd(200);
-            res.setRespData("(Key,Value) pair added successfully.");
+            res.setRespData("(Key,Value) pair added successfully");
             out.writeObject(res);
-
+    
             log.writeMethod(String.format("REGISTER(%s,%s) for %s completed successfully.", key, value, socket.getInetAddress().getHostAddress()));
-
-            replication service = new replication(key, value, "REGISTER");
-            service.start();
+    
+            if (!forceMode) {
+                replication service = new replication(key, value, "REGISTER");
+                service.start();
+            }
         } else {
-            res = new RES();
             res.setRespCd(300);
-            res.setRespData("Value with this KEY already exists.");
+            res.setRespData("Value with this KEY already exists");
             out.writeObject(res);
-
+    
             log.writeMethod(String.format("REGISTER(%s,%s) for %s failed. KEY already exists.", key, value, socket.getInetAddress().getHostAddress()));
         }
     }
@@ -171,13 +168,12 @@ public class ps extends Thread {
 
 private void handleReplicateLookupRequest(REQ request, ObjectOutputStream out) throws IOException {
     String key = (String) request.getReqData();
-    RES res=null;
-
     log.writeMethod(String.format("Serving REPLICATE - LOOKUP(%s) request of %s.", key, socket.getInetAddress().getHostAddress()));
 
     String value = FileTS.getfromREP_HT(key);
 
-    res = new RES();
+    RES res = new RES();
+
     if (value != null) {
         res.setRespCd(200);
         res.setRespData(key + "," + value);
@@ -193,13 +189,11 @@ private void handleReplicateLookupRequest(REQ request, ObjectOutputStream out) t
 
 private void handleReplicateUnregisterRequest(REQ request, ObjectOutputStream out) throws IOException {
     String key = (String) request.getReqData();
-    RES res=null;
-
     log.writeMethod(String.format("Serving REPLICATE - UNREGISTER(%s) request of %s.", key, socket.getInetAddress().getHostAddress()));
 
     FileTS.removefromREP_HT(socket.getInetAddress().getHostAddress(), key);
 
-    res = new RES();
+    RES res = new RES();
     res.setRespCd(200);
     out.writeObject(res);
 
@@ -212,25 +206,25 @@ private void handleReplicateUnregisterRequest(REQ request, ObjectOutputStream ou
     log.writeMethod(String.format("REPLICATE - UNREGISTER(%s) for %s completed successfully.", key, socket.getInetAddress().getHostAddress()));
 }
 
+
 private void handleGetReplicaHashTableRequest(REQ request, ObjectOutputStream out) throws IOException {
-    RES res=null;
     log.writeMethod(String.format("Serving GET_R_HASHTABLE request of %s.", socket.getInetAddress().getHostAddress()));
 
     HashMap<String, String> innerMap = FileTS.getReplicatedHT().get(socket.getInetAddress().getHostAddress());
+    RES res = new RES();
 
-    res = new RES();
     if (innerMap != null) {
         res.setRespCd(200);
         res.setRespData(innerMap);
-        out.writeObject(res);
     } else {
-        res = new RES();
-        res.setRespCd(404);
-        out.writeObject(res);
+        res.setRespCd(404); // Set the response status code to indicate "Not Found."
     }
+
+    out.writeObject(res);
 
     log.writeMethod(String.format("DATA of %s sent successfully. Request completed. " + innerMap, socket.getInetAddress().getHostAddress()));
 }
+
 
 private void handleGetHashTableRequest(REQ request, ObjectOutputStream out) throws IOException {
     RES res=null;

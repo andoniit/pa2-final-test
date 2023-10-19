@@ -93,32 +93,33 @@ public class replication extends Thread{
 
     //retrives data from hash table
     private boolean replicateHashTables() {
-		ConcurrentHashMap<String, HashMap<String, String>> replicatedHashTable = null;		
-		if (repliNodes.size() > 1) {
-			// If there is another replication node, get replication data from another data
-			replicatedHashTable = getReplicationData();
-		} else {
-			// If there is only one replication node. It gets data from all the peers in the network.
-			replicatedHashTable = getAllHashTables();
-		}
-		
-		if (replicatedHashTable != null && replicatedHashTable.size() > 0) {
-			FileTS.setReplicatedHT(replicatedHashTable);
-			return true;
-		}
-		return false;
-	}
+        ConcurrentHashMap<String, HashMap<String, String>> replicatedHashTable;
+    
+        if (repliNodes.size() > 1) {
+            // Get replication data from another replication node
+            replicatedHashTable = getReplicationData();
+        } else {
+            // Get data from all peers in the network
+            replicatedHashTable = getAllHashTables();
+        }
+    
+        if (replicatedHashTable != null && !replicatedHashTable.isEmpty()) {
+            FileTS.setReplicatedHT(replicatedHashTable);
+            return true;
+        }
+    
+        return false;
+    }
 
     private void replicateFiles() {
-        FileTS.getReplicatedHT().forEach((replicaPeerAddress, hashTable) -> {
-            hashTable.forEach((fileName, peerAddress) -> {
-                replicate(peerAddress, portAddress, fileName);
-            });
-        });
+        FileTS.getReplicatedHT()
+                .values()
+                .stream()
+                .flatMap(hashTable -> hashTable.entrySet().stream())
+                .forEach(entry -> replicate(entry.getValue(), portAddress, entry.getKey()));
     
         this.interrupt();
     }
-    
     
     //download file from requested peer
     private void replicate(String hostAddress, int port, String fileName) {
