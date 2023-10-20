@@ -13,5 +13,4 @@ clean:
 run:
 	$(JR) FileTS
 
-run_test:
-	$(JR) TestClient
+
